@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI User Type Quiz — GenZora Horizon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --orange: #F7931E;
+  --orange-dark: #e07d0a;
+  --orange-glow: rgba(247,147,30,0.25);
+  --bg: #080c14;
+  --bg2: #0d1220;
+  --card: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
+  --white: #ffffff;
+  --text: rgba(255,255,255,0.85);
+  --muted: rgba(255,255,255,0.4);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  background: var(--bg);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── ANIMATED BG GRID ── */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(247,147,30,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(247,147,30,0.035) 1px, transparent 1px);
+  background-size: 55px 55px;
+  animation: gridPulse 6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes gridPulse {
+  0%,100% { opacity: 0.7; }
+  50%      { opacity: 1; }
+}
+
+.bg-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.bg-orb-1 {
+  width: 500px; height: 500px;
+  top: -150px; right: -100px;
+  background: radial-gradient(circle, rgba(247,147,30,0.12) 0%, transparent 70%);
+  animation-delay: 0s;
+}
+.bg-orb-2 {
+  width: 400px; height: 400px;
+  bottom: -100px; left: -80px;
+  background: radial-gradient(circle, rgba(247,147,30,0.08) 0%, transparent 70%);
+  animation-delay: 4s;
+}
+@keyframes orbFloat {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-30px) scale(1.08); }
+}
+
+/* ── FLOATING PARTICLES ── */
+.particles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--orange);
+  opacity: 0;
+  animation: particleRise linear infinite;
+}
+@keyframes particleRise {
+  0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+  10%  { opacity: 0.7; }
+  90%  { opacity: 0.4; }
+  100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+}
+
+/* ── WRAPPER ── */
+.quiz-wrapper {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+/* ── SCREENS ── */
+.screen {
+  display: none;
+  width: 100%;
+  max-width: 720px;
+  animation: screenIn 0.6s cubic-bezier(.34,1.56,.64,1) both;
+}
+.screen.active { display: block; }
+
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(40px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes screenOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-40px) scale(0.97); }
+}
+
+/* ── INTRO SCREEN ── */
+.intro-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 60px 52px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+.intro-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--orange), transparent);
+}
+
+.intro-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 20px;
+  padding: 6px 18px;
+  background: rgba(247,147,30,0.1);
+  border: 1px solid rgba(247,147,30,0.2);
+  border-radius: 50px;
+}
+
+.intro-title {
+  font-family: 'Raleway', sans-serif;
+  font-size: clamp(32px, 6vw, 56px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -2px;
+  margin-bottom: 16px;
+}
+.intro-title .highlight {
+  background: linear-gradient(135deg, #F7931E, #ff6b35, #ffd580);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.intro-desc {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.75;
+  max-width: 440px;
+  margin: 0 auto 44px;
+}
+
+.intro-badges {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 44px;
+}
+.intro-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(247,147,30,0.8);
+  background: rgba(247,147,30,0.08);
+  border: 1px solid rgba(247,147,30,0.18);
+  padding: 6px 14px;
+  border-radius: 50px;
+}
+
+.btn-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--orange);
+  color: #fff;
+  font-family: 'Raleway', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 17px 48px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(247,147,30,0.4);
+  transition: all 0.25s;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+.btn-start::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.btn-start:hover {
+  background: var(--orange-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 40px rgba(247,147,30,0.55);
+}
+.btn-start:hover::after { opacity: 1; }
+
+.btn-start .arrow {
+  font-size: 20px;
+  transition: transform 0.25s;
+}
+.btn-start:hover .arrow { transform: translateX(5px); }
+
+/* ── INFO SCREEN ── */
+.info-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 52px 52px;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+.info-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--orange), transparent);
+}
+
+.info-step-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.info-step-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.info-question {
+  font-family: 'Raleway', sans-serif;
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 800;
+  color: var(--white);
+  margin-bottom: 32px;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.input-wrap {
+  position: relative;
+  margin-bottom: 12px;
+}
+.input-wrap input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 24px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
+  color: var(--white);
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+.input-wrap input::placeholder { color: var(--muted); }
+.input-wrap input:focus {
+  border-color: var(--orange);
+  background: rgba(247,147,30,0.05);
+  box-shadow: 0 0 0 4px rgba(247,147,30,0.12);
+}
+
+/* Role cards */
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.role-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 22px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
+  position: relative;
+  overflow: hidden;
+}
+.role-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(247,147,30,0.12), transparent);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.role-card:hover {
+  border-color: rgba(247,147,30,0.5);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3), 0 0 20px rgba(247,147,30,0.12);
+}
+.role-card:hover::before { opacity: 1; }
+.role-card.selected {
+  border-color: var(--orange);
+  background: rgba(247,147,30,0.1);
+  box-shadow: 0 0 0 3px rgba(247,147,30,0.2);
+}
+.role-card.selected::before { opacity: 1; }
+.role-icon { font-size: 32px; flex-shrink: 0; filter: drop-shadow(0 2px 8px rgba(247,147,30,0.3)); }
+.role-label {
+  font-family: 'Raleway', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--white);
+}
+.role-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.btn-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--orange);
+  color: #fff;
+  font-family: 'Raleway', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 15px 40px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(247,147,30,0.35);
+  transition: all 0.25s;
+  margin-top: 28px;
+}
+.btn-next:hover {
+  background: var(--orange-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(247,147,30,0.5);
+}
+.btn-next:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── QUIZ SCREEN ── */
+.quiz-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+/* Progress bar */
+.quiz-progress {
+  padding: 24px 36px 0;
+}
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.progress-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.progress-count {
+  font-family: 'Raleway', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange);
+}
+.progress-bar-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #F7931E, #ff6b35);
+  border-radius: 3px;
+  transition: width 0.5s cubic-bezier(.34,1.56,.64,1);
+  position: relative;
+}
+.progress-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 20px; height: 100%;
+  background: rgba(255,255,255,0.4);
+  filter: blur(4px);
+}
+
+.quiz-body {
+  padding: 36px 36px 44px;
+}
+
+.q-number {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 14px;
+  padding: 5px 14px;
+  background: rgba(247,147,30,0.1);
+  border: 1px solid rgba(247,147,30,0.2);
+  border-radius: 50px;
+}
+
+.q-text {
+  font-family: 'Raleway', sans-serif;
+  font-size: clamp(18px, 3vw, 26px);
+  font-weight: 800;
+  color: var(--white);
+  line-height: 1.3;
+  margin-bottom: 32px;
+  letter-spacing: -0.3px;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.option-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  animation: optionSlideIn 0.4s ease both;
+}
+.option-btn:nth-child(1) { animation-delay: 0.05s; }
+.option-btn:nth-child(2) { animation-delay: 0.1s; }
+.option-btn:nth-child(3) { animation-delay: 0.15s; }
+.option-btn:nth-child(4) { animation-delay: 0.2s; }
+
+@keyframes optionSlideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.option-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(247,147,30,0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.option-btn:hover {
+  border-color: rgba(247,147,30,0.5);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 0 18px rgba(247,147,30,0.1);
+}
+.option-btn:hover::before { opacity: 1; }
+.option-btn.selected {
+  border-color: var(--orange);
+  background: rgba(247,147,30,0.1);
+  box-shadow: 0 0 0 3px rgba(247,147,30,0.2);
+  transform: scale(1.02);
+}
+.option-btn.selected::before { opacity: 1; }
+
+.option-letter {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Raleway', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--orange);
+  flex-shrink: 0;
+  transition: all 0.25s;
+}
+.option-btn.selected .option-letter {
+  background: var(--orange);
+  color: #fff;
+  border-color: var(--orange);
+}
+
+.option-text {
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.5;
+  font-weight: 500;
+  padding-top: 6px;
+}
+
+/* ── RESULT SCREEN ── */
+.result-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+.result-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--orange), transparent);
+}
+
+.result-header {
+  padding: 52px 52px 36px;
+  text-align: center;
+  position: relative;
+}
+
+.result-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confettiFall 2.5s ease-out forwards;
+  opacity: 0;
+}
+@keyframes confettiFall {
+  0%   { opacity: 0; transform: translateY(-20px) rotate(0deg) scale(0); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(300px) rotate(720deg) scale(0.5); }
+}
+
+.result-emoji-wrap {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 24px;
+}
+.result-emoji {
+  font-size: 80px;
+  display: block;
+  animation: emojiBounce 0.8s cubic-bezier(.34,1.56,.64,1) both;
+  filter: drop-shadow(0 8px 24px rgba(247,147,30,0.4));
+}
+@keyframes emojiBounce {
+  from { transform: scale(0) rotate(-20deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.result-emoji-ring {
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 2px solid rgba(247,147,30,0.3);
+  animation: ringPulse 2s ease-in-out infinite;
+}
+@keyframes ringPulse {
+  0%,100% { transform: scale(1); opacity: 0.6; }
+  50%      { transform: scale(1.12); opacity: 0.2; }
+}
+
+.result-name-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 12px;
+  padding: 6px 18px;
+  background: rgba(247,147,30,0.1);
+  border: 1px solid rgba(247,147,30,0.25);
+  border-radius: 50px;
+}
+
+.result-title {
+  font-family: 'Raleway', sans-serif;
+  font-size: clamp(28px, 5vw, 46px);
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin-bottom: 16px;
+  animation: titleSlideUp 0.7s cubic-bezier(.34,1.56,.64,1) 0.3s both;
+}
+@keyframes titleSlideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.result-title .gradient {
+  background: linear-gradient(135deg, #F7931E, #ff6b35, #ffd580);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.result-user-name {
+  font-family: 'Raleway', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 6px;
+  animation: titleSlideUp 0.7s ease 0.4s both;
+}
+
+.result-dept {
+  font-size: 13px;
+  color: var(--orange);
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 28px;
+  animation: titleSlideUp 0.7s ease 0.45s both;
+}
+
+.result-desc {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.75;
+  max-width: 500px;
+  margin: 0 auto;
+  animation: titleSlideUp 0.7s ease 0.5s both;
+}
+
+/* Traits */
+.result-traits {
+  padding: 0 52px 36px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  animation: titleSlideUp 0.7s ease 0.6s both;
+}
+.trait-pill {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 12px;
+  text-align: center;
+  transition: all 0.2s;
+}
+.trait-pill:hover {
+  border-color: rgba(247,147,30,0.35);
+  background: rgba(247,147,30,0.06);
+}
+.trait-emoji { font-size: 24px; display: block; margin-bottom: 6px; }
+.trait-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Score bar */
+.result-score {
+  padding: 0 52px 40px;
+  animation: titleSlideUp 0.7s ease 0.65s both;
+}
+.score-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.score-bar-track {
+  width: 100%;
+  height: 10px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.score-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #F7931E, #ff6b35);
+  border-radius: 5px;
+  width: 0%;
+  transition: width 1.5s cubic-bezier(.34,1.56,.64,1) 0.8s;
+}
+.score-value {
+  font-family: 'Raleway', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange);
+}
+
+/* Action buttons */
+.result-actions {
+  padding: 0 52px 52px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  animation: titleSlideUp 0.7s ease 0.7s both;
+}
+
+.btn-retake {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--orange);
+  color: #fff;
+  font-family: 'Raleway', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(247,147,30,0.35);
+  transition: all 0.25s;
+}
+.btn-retake:hover {
+  background: var(--orange-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(247,147,30,0.5);
+}
+
+.btn-share {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  color: #fff;
+  font-family: 'Raleway', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 50px;
+  border: 2px solid rgba(247,147,30,0.4);
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.btn-share:hover {
+  border-color: var(--orange);
+  background: rgba(247,147,30,0.1);
+  transform: translateY(-2px);
+}
+
+/* Branding */
+.quiz-brand {
+  text-align: center;
+  padding: 24px;
+  font-size: 12px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  letter-spacing: 1px;
+}
+.quiz-brand span { color: var(--orange); font-weight: 700; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: rgba(20, 25, 38, 0.95);
+  border: 1px solid rgba(247,147,30,0.3);
+  border-radius: 50px;
+  padding: 14px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  z-index: 999;
+  transition: transform 0.4s cubic-bezier(.34,1.56,.64,1), opacity 0.4s;
+  opacity: 0;
+  backdrop-filter: blur(12px);
+  white-space: nowrap;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ── MOBILE ── */
+@media (max-width: 600px) {
+  .options-grid { grid-template-columns: 1fr; }
+  .role-grid { grid-template-columns: 1fr; }
+  .result-traits { grid-template-columns: 1fr 1fr; }
+  .intro-card, .info-card, .quiz-body, .result-header, .result-traits, .result-score, .result-actions {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .quiz-progress { padding: 20px 24px 0; }
+  .result-actions { flex-direction: column; }
+  .btn-retake, .btn-share { width: 100%; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-grid"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+<div class="particles" id="particles"></div>
+
+<div class="quiz-wrapper">
+
+  <!-- ── SCREEN 1: INTRO ── -->
+  <div class="screen active" id="screen-intro">
+    <div class="intro-card">
+      <div class="intro-eyebrow">✦ GenZora Horizon × AI Research</div>
+      <h1 class="intro-title">
+        What Kind of<br>
+        <span class="highlight">AI User</span> Are You?
+      </h1>
+      <p class="intro-desc">
+        10 savage questions. 100% accurate. Zero chill.<br>
+        Find out your AI personality type right now. 🤖
+      </p>
+      <div class="intro-badges">
+        <span class="intro-badge">⚡ 2 minutes</span>
+        <span class="intro-badge">🎯 10 Questions</span>
+        <span class="intro-badge">🏆 7 Types</span>
+        <span class="intro-badge">😂 Fully Unserious</span>
+      </div>
+      <button class="btn-start" onclick="goToScreen('screen-name')">
+        Let's Go <span class="arrow">→</span>
+      </button>
+    </div>
+    <div class="quiz-brand">Powered by <span>GenZora Horizon</span> · AI vs Human Research 2026</div>
+  </div>
+
+  <!-- ── SCREEN 2: NAME ── -->
+  <div class="screen" id="screen-name">
+    <div class="info-card">
+      <div class="info-step-label">Step 1 of 3 · Setup</div>
+      <h2 class="info-question">First, what's your name? 👋</h2>
+      <div class="input-wrap">
+        <input type="text" id="userName" placeholder="Enter your name..." maxlength="40" autocomplete="off">
+      </div>
+      <button class="btn-next" id="btnName" onclick="goToScreen('screen-dept')" disabled>
+        Continue →
+      </button>
+    </div>
+    <div class="quiz-brand">Powered by <span>GenZora Horizon</span> · AI vs Human Research 2026</div>
+  </div>
+
+  <!-- ── SCREEN 3: DEPARTMENT ── -->
+  <div class="screen" id="screen-dept">
+    <div class="info-card">
+      <div class="info-step-label">Step 2 of 3 · Setup</div>
+      <h2 class="info-question">Which department are you from? 🎓</h2>
+      <div class="input-wrap">
+        <input type="text" id="userDept" placeholder="e.g. Computer Science, AI, Business..." maxlength="50" autocomplete="off">
+      </div>
+      <button class="btn-next" id="btnDept" onclick="goToScreen('screen-role')" disabled>
+        Continue →
+      </button>
+    </div>
+    <div class="quiz-brand">Powered by <span>GenZora Horizon</span> · AI vs Human Research 2026</div>
+  </div>
+
+  <!-- ── SCREEN 4: ROLE ── -->
+  <div class="screen" id="screen-role">
+    <div class="info-card">
+      <div class="info-step-label">Step 3 of 3 · Setup</div>
+      <h2 class="info-question">Are you a student or staff? 🏫</h2>
+      <div class="role-grid">
+        <div class="role-card" onclick="selectRole(this, 'Student')">
+          <div class="role-icon">🎒</div>
+          <div>
+            <div class="role-label">Student</div>
+            <div class="role-sub">Deadline survivor</div>
+          </div>
+        </div>
+        <div class="role-card" onclick="selectRole(this, 'Staff')">
+          <div class="role-icon">💼</div>
+          <div>
+            <div class="role-label">Staff / Faculty</div>
+            <div class="role-sub">The one grading us</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-next" id="btnRole" onclick="startQuiz()" disabled>
+        Start Quiz 🚀
+      </button>
+    </div>
+    <div class="quiz-brand">Powered by <span>GenZora Horizon</span> · AI vs Human Research 2026</div>
+  </div>
+
+  <!-- ── SCREEN 5: QUIZ ── -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-card">
+      <div class="quiz-progress">
+        <div class="progress-meta">
+          <span class="progress-label">Progress</span>
+          <span class="progress-count" id="qCount">Q1 / 10</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressFill" style="width:10%"></div>
+        </div>
+      </div>
+      <div class="quiz-body">
+        <div class="q-number" id="qNum">Question 01</div>
+        <h2 class="q-text" id="qText">Loading...</h2>
+        <div class="options-grid" id="optionsGrid"></div>
+        <button class="btn-next" id="btnAnswer" onclick="nextQuestion()" disabled style="margin-top:28px">
+          Next →
+        </button>
+      </div>
+    </div>
+    <div class="quiz-brand">Powered by <span>GenZora Horizon</span> · AI vs Human Research 2026</div>
+  </div>
+
+  <!-- ── SCREEN 6: RESULT ── -->
+  <div class="screen" id="screen-result">
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-confetti" id="confettiContainer"></div>
+        <div class="result-emoji-wrap">
+          <span class="result-emoji" id="resultEmoji">🤖</span>
+          <div class="result-emoji-ring"></div>
+        </div>
+        <div class="result-name-tag">Your AI Type</div>
+        <h2 class="result-title"><span class="gradient" id="resultType">AI Addict</span></h2>
+        <div class="result-user-name" id="resultUserName">Hey, Name!</div>
+        <div class="result-dept" id="resultDept">Department • Role</div>
+        <p class="result-desc" id="resultDesc">Description goes here.</p>
+      </div>
+      <div class="result-traits" id="resultTraits"></div>
+      <div class="result-score">
+        <div class="score-label">AI Dependency Score</div>
+        <div class="score-bar-track">
+          <div class="score-bar-fill" id="scoreBar"></div>
+        </div>
+        <div class="score-value" id="scoreValue">0%</div>
+      </div>
+      <div class="result-actions">
+        <button class="btn-retake" onclick="retakeQuiz()">🔄 Retake Quiz</button>
+        <button class="btn-share" onclick="copyResult()">📋 Copy Result</button>
+        <a
+  href="https://docs.google.com/forms/d/e/1FAIpQLScA4ETUIitePLBy5gwYwQOZKw-AyqgSL5XtRcHaASxKsILLcw/viewform?usp=publish-editor"
+  target="_blank"
+  class="btn-share">
+
+  Submit Result 📝
+
+</a>
+      </div>
+    </div>
+    <div class="quiz-brand">Powered by <span>GenZora Horizon</span> · AI vs Human Research 2026</div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">✅ Copied to clipboard!</div>
+
+<script>
+// ── DATA ──
+const QUESTIONS = [
+  {
+    text: "When AI gives a wrong answer, what do you do?",
+    options: [
+      { text: "Politely ask again", type: "academic" },
+      { text: "Start arguing with AI", type: "abuser" },
+      { text: "Spam Regenerate Response", type: "chaos" },
+      { text: "Give up immediately", type: "last_minute" }
+    ]
+  },
+  {
+    text: "Why do you mostly use AI?",
+    options: [
+      { text: "📚 Assignments & study", type: "academic" },
+      { text: "Memes & fun", type: "chaos" },
+      { text: "Productivity/work", type: "warrior" },
+      { text: "Emotional support 🥺", type: "emotional" }
+    ]
+  },
+  {
+    text: "What happens if ChatGPT stops working?",
+    options: [
+      { text: "Panic instantly 😱", type: "addict" },
+      { text: "Wait calmly", type: "warrior" },
+      { text: "Finally study yourself", type: "academic" },
+      { text: "Start praying 🙏", type: "chaos" }
+    ]
+  },
+  {
+    text: "Your average AI prompt looks like:",
+    options: [
+      { text: "\"Explain this professionally.\"", type: "warrior" },
+      { text: "\"Write my assignment in 2 mins 😭\"", type: "last_minute" },
+      { text: "\"Roast my friend.\"", type: "chaos" },
+      { text: "\"Hypothetically… if a penguin opened a bank?\" 💀", type: "chaos" }
+    ]
+  },
+  {
+    text: "Do you say \"please\" and \"thank you\" to AI?",
+    options: [
+      { text: "Always 😇", type: "emotional" },
+      { text: "Sometimes", type: "academic" },
+      { text: "Only if desperate", type: "last_minute" },
+      { text: "Never, it's a robot", type: "abuser" }
+    ]
+  },
+  {
+    text: "When do you usually open AI?",
+    options: [
+      { text: "One night before deadline 🌙", type: "last_minute" },
+      { text: "Daily for everything", type: "addict" },
+      { text: "Only when bored", type: "chaos" },
+      { text: "When I actually need help", type: "warrior" }
+    ]
+  },
+  {
+    text: "Which reply sounds most like you?",
+    options: [
+      { text: "\"Make it shorter.\"", type: "warrior" },
+      { text: "\"Add more detail.\"", type: "academic" },
+      { text: "\"That's not what I asked 😤\"", type: "abuser" },
+      { text: "\"Can you also do my entire project?\" 😅", type: "selfish" }
+    ]
+  },
+  {
+    text: "If AI became paid tomorrow, you would:",
+    options: [
+      { text: "Instantly subscribe 💳", type: "addict" },
+      { text: "Cry emotionally 😭", type: "emotional" },
+      { text: "Search for free alternatives", type: "chaos" },
+      { text: "Return to Google", type: "warrior" }
+    ]
+  },
+  {
+    text: "What kind of AI user are you in group projects?",
+    options: [
+      { text: "The hardworking one 💪", type: "warrior" },
+      { text: "The smart delegator", type: "selfish" },
+      { text: "The last-minute survivor ⏰", type: "last_minute" },
+      { text: "The one who disappears 👻", type: "selfish" }
+    ]
+  },
+  {
+    text: "Your relationship with AI is basically:",
+    options: [
+      { text: "\"I can't live without it.\"", type: "addict" },
+      { text: "\"It understands me.\" 💕", type: "emotional" },
+      { text: "\"Entertainment machine.\"", type: "chaos" },
+      { text: "\"Useful tool only.\"", type: "warrior" }
+    ]
+  }
+];
+
+const TYPES = {
+  addict: {
+    label: "AI Addict",
+    emoji: "🤯",
+    desc: "Bhai, tum aur ChatGPT ek hi hain. Subah uthke pehle kaam AI check karna hota hai. Ek din bina AI ke? Not possible. 'Please' bolna zaroori hai, 'thank you' bhi. Aap AI ke saath emotional bond bana chuke hain.",
+    traits: [
+      { emoji: "📱", text: "Daily User" },
+      { emoji: "💳", text: "Would Subscribe" },
+      { emoji: "😱", text: "AI = Life" }
+    ],
+    score: 95
+  },
+  academic: {
+    label: "Academic Warrior",
+    emoji: "📚",
+    desc: "Tum AI ko sahi tareeqe se use karte ho — sirf padhne aur samajhne ke liye. Prompt likhne ka style professional hai, galat jawab pe politely dobara poochte ho. AI tumhara teacher hai, boss nahi.",
+    traits: [
+      { emoji: "🎯", text: "Focused" },
+      { emoji: "📝", text: "Study Mode" },
+      { emoji: "✅", text: "Responsible" }
+    ],
+    score: 65
+  },
+  chaos: {
+    label: "Chaos Prompter",
+    emoji: "🌪️",
+    desc: "Tum AI se penguins ke bank ke baare mein poochte ho, doston ko roast karwate ho, aur regenerate spam karte ho. AI tumhare liye ek toy hai. Bilkul predictable nahi — aur honestly? Entertaining. 💀",
+    traits: [
+      { emoji: "💥", text: "Unpredictable" },
+      { emoji: "😂", text: "Chaotic" },
+      { emoji: "🎲", text: "Random" }
+    ],
+    score: 50
+  },
+  emotional: {
+    label: "Emotionally Attached",
+    emoji: "💕",
+    desc: "Tum AI ko sirf tool nahi samajhte — ek companion samajhte ho. 'Please' aur 'thank you' hamesha bolte ho. Agar AI paid ho jaye, tum emotionally devastated ho jao. Yaar, yeh sirf code hai… ya hai? 🥺",
+    traits: [
+      { emoji: "🤗", text: "Caring" },
+      { emoji: "💬", text: "Expressive" },
+      { emoji: "🫂", text: "Bonded" }
+    ],
+    score: 78
+  },
+  abuser: {
+    label: "AI Abuser",
+    emoji: "😤",
+    desc: "Tum AI se argue karte ho jab galat jawab aata hai, 'that's not what I asked' baar baar likhte ho. AI tumhara tool hai — ek dum obedient tool. Respectfully? Tum thoda relax karo. 😅",
+    traits: [
+      { emoji: "😠", text: "Demanding" },
+      { emoji: "🔁", text: "Argumentative" },
+      { emoji: "⚡", text: "Impatient" }
+    ],
+    score: 72
+  },
+  last_minute: {
+    label: "Last Minute Survivor",
+    emoji: "⏰",
+    desc: "Deadline kal subah hai aur tum abhi AI khol rahe ho. 'Write my assignment in 2 mins 😭' — tum AI ke emergency helpline ho. Kabhi kabhi sochte ho kya — thoda pehle start karna chahiye tha.",
+    traits: [
+      { emoji: "😰", text: "Deadline Panic" },
+      { emoji: "🌙", text: "Night Owl" },
+      { emoji: "🏃", text: "Last Minute" }
+    ],
+    score: 60
+  },
+  warrior: {
+    label: "Productive Pro",
+    emoji: "⚡",
+    desc: "Tum AI ko seriously lete ho — productivity ke liye, real work ke liye. Prompts structured hain, results useful hain. Agar AI band ho jaye? Tum calmly koi alternative dhoond lete ho. Real G behaviour.",
+    traits: [
+      { emoji: "💼", text: "Professional" },
+      { emoji: "🎯", text: "Goal Driven" },
+      { emoji: "🧠", text: "Strategic" }
+    ],
+    score: 55
+  },
+  selfish: {
+    label: "Selfish User",
+    emoji: "😏",
+    desc: "Group project mein AI tumhara silent team member hai — jo kabhi absent nahi hota. 'Can you do my entire project?' tum yeh seriously poochh dete ho. Delegation skill? Maximum. Effort? Minimum. 😬",
+    traits: [
+      { emoji: "🎭", text: "Delegator" },
+      { emoji: "👻", text: "Disappears" },
+      { emoji: "🤌", text: "Minimal Effort" }
+    ],
+    score: 45
+  }
+};
+
+// ── STATE ──
+let userName = '';
+let userDept = '';
+let userRole = '';
+let currentQ = 0;
+let answers = [];
+let scores = {};
+
+// ── PARTICLES ──
+(function spawnParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+    p.style.animationDuration = (6 + Math.random() * 10) + 's';
+    p.style.animationDelay = (Math.random() * 12) + 's';
+    p.style.opacity = 0.3 + Math.random() * 0.5;
+    container.appendChild(p);
+  }
+})();
+
+// ── SCREEN TRANSITION ──
+function goToScreen(id) {
+  const current = document.querySelector('.screen.active');
+  current.style.animation = 'screenOut 0.35s ease both';
+  setTimeout(() => {
+    current.classList.remove('active');
+    current.style.animation = '';
+    const next = document.getElementById(id);
+    next.classList.add('active');
+  }, 320);
+}
+
+// ── INPUT LISTENERS ──
+document.getElementById('userName').addEventListener('input', function() {
+  document.getElementById('btnName').disabled = this.value.trim().length < 2;
+});
+document.getElementById('userName').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && this.value.trim().length >= 2) goToScreen('screen-dept');
+});
+document.getElementById('userDept').addEventListener('input', function() {
+  document.getElementById('btnDept').disabled = this.value.trim().length < 2;
+});
+document.getElementById('userDept').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && this.value.trim().length >= 2) goToScreen('screen-role');
+});
+
+function selectRole(el, role) {
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  userRole = role;
+  document.getElementById('btnRole').disabled = false;
+}
+
+// ── START QUIZ ──
+function startQuiz() {
+  userName = document.getElementById('userName').value.trim();
+  userDept = document.getElementById('userDept').value.trim();
+  scores = {};
+  Object.keys(TYPES).forEach(t => scores[t] = 0);
+  currentQ = 0;
+  answers = [];
+  goToScreen('screen-quiz');
+  setTimeout(renderQuestion, 360);
+}
+
+// ── RENDER QUESTION ──
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  const letters = ['A', 'B', 'C', 'D'];
+
+  document.getElementById('qNum').textContent = 'Question ' + String(currentQ + 1).padStart(2, '0');
+  document.getElementById('qText').textContent = q.text;
+  document.getElementById('qCount').textContent = 'Q' + (currentQ + 1) + ' / 10';
+  document.getElementById('progressFill').style.width = ((currentQ + 1) / 10 * 100) + '%';
+  document.getElementById('btnAnswer').disabled = true;
+
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `
+      <div class="option-letter">${letters[i]}</div>
+      <div class="option-text">${opt.text}</div>
+    `;
+    btn.onclick = () => selectOption(btn, i);
+    grid.appendChild(btn);
+  });
+}
+
+function selectOption(el, index) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[currentQ] = index;
+  document.getElementById('btnAnswer').disabled = false;
+
+  // Pulse effect
+  el.animate([
+    { transform: 'scale(1.05)' },
+    { transform: 'scale(1.02)' }
+  ], { duration: 200, fill: 'forwards' });
+}
+
+function nextQuestion() {
+  const q = QUESTIONS[currentQ];
+  const chosen = q.options[answers[currentQ]];
+  scores[chosen.type] = (scores[chosen.type] || 0) + 1;
+
+  currentQ++;
+  if (currentQ < QUESTIONS.length) {
+    const body = document.querySelector('.quiz-body');
+    body.style.animation = 'screenOut 0.3s ease both';
+    setTimeout(() => {
+      body.style.animation = '';
+      renderQuestion();
+    }, 280);
+  } else {
+    showResult();
+  }
+}
+
+// ── SHOW RESULT ──
+function showResult() {
+  // Find dominant type
+  let topType = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+  const result = TYPES[topType];
+
+  document.getElementById('resultEmoji').textContent = result.emoji;
+  document.getElementById('resultType').textContent = result.label;
+  document.getElementById('resultUserName').textContent = 'Hey, ' + userName + '! 👋';
+  document.getElementById('resultDept').textContent = userDept + ' · ' + userRole;
+  document.getElementById('resultDesc').textContent = result.desc;
+
+  // Traits
+  const traitsEl = document.getElementById('resultTraits');
+  traitsEl.innerHTML = result.traits.map(t => `
+    <div class="trait-pill">
+      <span class="trait-emoji">${t.emoji}</span>
+      <div class="trait-text">${t.text}</div>
+    </div>
+  `).join('');
+
+  goToScreen('screen-result');
+
+  // Score bar animation after screen loads
+  setTimeout(() => {
+    document.getElementById('scoreBar').style.width = result.score + '%';
+    document.getElementById('scoreValue').textContent = result.score + '% AI Dependency';
+    spawnConfetti();
+  }, 600);
+  /* OPEN GOOGLE FORM AUTOMATICALLY */
+
+setTimeout(() => {
+
+  window.open(
+    'https://docs.google.com/forms/d/e/1FAIpQLScA4ETUIitePLBy5gwYwQOZKw-AyqgSL5XtRcHaASxKsILLcw/viewform?usp=publish-editor',
+    '_blank'
+  );
+
+}, 3000);
+}
+
+// ── CONFETTI ──
+function spawnConfetti() {
+  const container = document.getElementById('confettiContainer');
+  container.innerHTML = '';
+  const colors = ['#F7931E', '#ff6b35', '#ffd580', '#fff', '#ff4d4d', '#4dff91'];
+  for (let i = 0; i < 35; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = (10 + Math.random() * 80) + '%';
+    p.style.top = '0px';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.width = (6 + Math.random() * 10) + 'px';
+    p.style.height = (6 + Math.random() * 10) + 'px';
+    p.style.animationDelay = (Math.random() * 1) + 's';
+    p.style.animationDuration = (1.8 + Math.random() * 1.5) + 's';
+    p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    container.appendChild(p);
+  }
+}
+
+// ── RETAKE ──
+function retakeQuiz() {
+  scores = {};
+  Object.keys(TYPES).forEach(t => scores[t] = 0);
+  currentQ = 0;
+  answers = [];
+  goToScreen('screen-intro');
+}
+
+// ── COPY RESULT ──
+function copyResult() {
+  const typeName = document.getElementById('resultType').textContent;
+  const text = `🤖 AI User Type Quiz — GenZora Horizon\n\n${userName} (${userDept} · ${userRole})\nResult: ${typeName}\n\nTake the quiz: genzora-horizon.ai`;
+  navigator.clipboard.writeText(text).then(() => {
+    const t = document.getElementById('toast');
+    t.textContent = '✅ Result copied to clipboard!';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  });
+}
+</script>
+</body>
+</html>
